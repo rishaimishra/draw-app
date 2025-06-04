@@ -2,7 +2,8 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import { middleware } from "./middleware";
-import {CreateUserSchema} from "@repo/common/types"
+import {CreateUserSchema, SigninSchema, CreateRoomSchema} from "@repo/common/types"
+import {prismaClient} from "@repo/db/client"
 
 const app = express();
 app.use(express.json());
@@ -18,14 +19,24 @@ app.post("/signup", (req, res) => {
         return
     }
 
+    prismaClient.user.create({
+        data
+    })
+
     res.json({
         message: "You have signed up",
     });
 });
 
 app.post("/signin", (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+   const data = SigninSchema.safeParse(req.body)
+
+    if (!data.success) {
+        res.json({
+            message: "Incorrect inputs"
+        })
+        return
+    }
 
     const user = 1;
 
@@ -48,6 +59,15 @@ app.post("/signin", (req, res) => {
 });
 
 app.get("/room", middleware, (req, res) => {
+
+     const data = CreateRoomSchema.safeParse(req.body)
+
+    if (!data.success) {
+        res.json({
+            message: "Incorrect inputs"
+        })
+        return
+    }
     const token = req.headers.authorization;
     res.status(403).send({
         message: "Invalid username or password",
