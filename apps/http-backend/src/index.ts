@@ -19,9 +19,15 @@ app.post("/signup", (req, res) => {
         return
     }
 
-    prismaClient.user.create({
+    try {
+        prismaClient.user.create({
         data
     })
+    } catch (error) {
+        res.json({
+            error:error
+        })
+    }
 
     res.json({
         message: "You have signed up",
